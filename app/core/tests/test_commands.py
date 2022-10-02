@@ -30,7 +30,7 @@ class CommandTests(SimpleTestCase):
         #mock the check to raise 5 errors and a final True
         patched_check.side_effect = [Psycopg2Error] *2 + [OperationalError] * 3 + [True] 
 
-        call_command('wait _for_db') #call the custom command
+        call_command('wait_for_db') #call the custom command
 
         #check that the command was called 6 times
         self.assertEqual(patched_check.call_count, 6) 
