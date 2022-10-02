@@ -21,7 +21,7 @@ class CommandTests(SimpleTestCase):
         call_command('wait_for_db') #call the custom command
 
         #check that its called once with the right db
-        patched_check.assert_called_once_with(database=['default']) 
+        patched_check.assert_called_once_with(databases=['default']) 
 
     @patch('time.sleep') #mock the passing of time between tests without delaying the test
     def test_wait_for_db_delay(self, patched_sleep, patched_check):
@@ -36,4 +36,4 @@ class CommandTests(SimpleTestCase):
         self.assertEqual(patched_check.call_count, 6) 
 
         #check that its called with the right db
-        patched_check.assert_called_with(database=['default']) 
+        patched_check.assert_called_with(databases=['default']) 
