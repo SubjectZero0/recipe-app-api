@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 
 
-class ModelTests(TestCase):
+class CustomUserModelTests(TestCase):
     """Tests models"""
 
     def test_create_user_with_email_success(self):
@@ -34,3 +34,26 @@ class ModelTests(TestCase):
 
         self.assertEqual(user.is_staff, True)
         self.assertEqual(user.is_superuser, True)
+
+
+    def test_password_hashing(self):
+        """Tests if the password provided by the user is the same after creation,
+        or it gets hashed."""
+
+        email = 'test3@example.com'
+        name = 'test name 3'
+        password = 'testpassword3'
+
+        user = get_user_model().objects.create_user(email = email,
+                                                    name = name,
+                                                    password = password,)
+        self.assertNotEqual(user.password, password)
+
+
+    def test_create_user_without_email(self):
+        """Tests if user can be created without email, or it raises a ValueError"""
+
+        with self.assertRaises(ValueError):
+            user = get_user_model().objects.create_user(email = '',
+                                                        name = 'test name 4',
+                                                        password = 'testpassword4')
