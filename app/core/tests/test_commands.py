@@ -21,19 +21,19 @@ class CommandTests(SimpleTestCase):
         call_command('wait_for_db') #call the custom command
 
         #check that its called once with the right db
-        patched_check.assert_called_once_with(databases=['default']) 
+        patched_check.assert_called_once_with(databases=['default'])
 
     @patch('time.sleep') #mock the passing of time between tests without delaying the test
     def test_wait_for_db_delay(self, patched_sleep, patched_check):
         """Test waiting for db when getting OperationalError"""
 
         #mock the check to raise 5 errors and a final True
-        patched_check.side_effect = [Psycopg2Error] *2 + [OperationalError] * 3 + [True] 
+        patched_check.side_effect = [Psycopg2Error] *2 + [OperationalError] * 3 + [True]
 
         call_command('wait_for_db') #call the custom command
 
         #check that the command was called 6 times
-        self.assertEqual(patched_check.call_count, 6) 
+        self.assertEqual(patched_check.call_count, 6)
 
         #check that its called with the right db
-        patched_check.assert_called_with(databases=['default']) 
+        patched_check.assert_called_with(databases=['default'])
