@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'User.apps.UserConfig',
     'rest_framework',
     'drf_spectacular',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -134,13 +135,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'core.CustomUserModel'
 
-#DRF-SPECTACULAR settings
+
 
 REST_FRAMEWORK = {
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
 }
 
+#DRF-SPECTACULAR settings
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Recipes API',
     'DESCRIPTION': 'A REST API for Cooking Recipes',
