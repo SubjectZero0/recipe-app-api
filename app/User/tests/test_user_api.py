@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework import status
 
-CREATE_USER_URL = reverse('User:create') #sets up the url for creating a user
+USER_URL = reverse('users-list') #sets up the url for creating a user
 
 def create_user(**params):
     """Helper function to create a user with variable parameters"""
@@ -31,9 +31,21 @@ class PublicUserApiTests(TestCase):
                     'name':'test name',
                     'password':'testpassword'}
 
-        response = self.client.post(CREATE_USER_URL, payload) #creates a response for creating a user at the endpoint
-
+        response = self.client.post(USER_URL, payload) #creates a response for creating a user at the endpoint
         self.assertEqual(response.status_code, status.HTTP_201_CREATED) #checks the status code of the response
 
         user = get_user_model().objects.get(email=payload['email']) #GETS user by email
-        self.assertEqual(user.check_password, payload['password']) #checks that the hashed user passord translates to the given password
+        self.assertTrue(user.check_password) #checks that the hashed user passord translates to the given password
+
+
+    def test_user_with_email_already_exists(self):
+        """Tests that email is unique"""
+
+        payload = {'email':'user@example.com',
+                    'name':'test name',
+                    'password':'testpassword'}
+
+        create_user(**payload)
+
+        response = self.client.post(USER_URL, payload)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
