@@ -7,7 +7,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
 from rest_framework.filters import SearchFilter
 
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserLoginSerializer
 from .permissions import UpdateSelfUserPermissions
 
 # Create your views here.
@@ -26,4 +26,5 @@ class UserViewSet(ModelViewSet):
 class UserLoginApiView(ObtainAuthToken):
     """Handles User Login"""
 
+    serializer_class = UserLoginSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
