@@ -127,15 +127,15 @@ class PublicUserApiTests(TestCase):
 
 class InactiveUserApiTests(TestCase):
     """
-    creates a superuser and sets is_active False then tests if inactive users
+    creates a superuser and sets is_active = False then tests if inactive users
     can log in.
     """
 
     def setUp(self):
         """
         Sets up the superuser creation, mocks loging in to the django admin page,
-        through the Client() client sets permission attributes to false,
-        saves the changes and logs out. Finally sets the client to the APIClient()
+        through the Client() client, sets permissions attributes to false,
+        saves the changes, and logs out. Finally sets the client to the APIClient()
 
 
         """
