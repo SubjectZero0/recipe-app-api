@@ -49,9 +49,8 @@ class UserLoginSerializer(serializers.Serializer):
         )
 
         if user is not None:
-            if user.is_active == True:
-                data['user'] = user
-                return data
+            data['user'] = user
+            return data
         else:
-            msg = 'Could not authenticate with the given credentials. Please enter a valid E-mail and/or password'
+            msg = 'Could not authenticate. Make sure you type the correct email and/or password'
             raise serializers.ValidationError(msg, code='authorization')
