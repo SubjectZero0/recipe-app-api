@@ -1,5 +1,7 @@
+import email
+from unicodedata import name
 from django.test import Client
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APITestCase
 from django.urls import reverse
 from django.test import TestCase
 from django.contrib.auth import get_user_model
@@ -9,7 +11,6 @@ from rest_framework.serializers import ValidationError
 
 USER_URL = reverse('users-list') #sets up the url for creating a user
 LOGIN_URL = reverse('User:login')
-USER_DETAIL_URL = reverse('users-detail', kwargs={'pk':1})
 
 def create_user(**params):
     """Helper function to create a user with variable parameters"""
@@ -177,4 +178,127 @@ class InactiveUserApiTests(TestCase):
         response = self.client.post(LOGIN_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertNotIn('token', response.data)
+
+
+#######################################################################################
+
+
+class PrivateUserApiTests(APITestCase):
+    """Tests authenticated users' functionalities"""
+
+    def setUp(self):
+        """Set up forced authentication of an example user"""
+
+        user_details = {
+            'email':'user@example.com',
+            'name':'test name',
+            'password':'testpassword'
+            }
+
+        create_user(**user_details)
+        self.user = get_user_model().objects.get(email=user_details['email'])
+        self.client.force_authenticate(user=self.user)
+
+        return super().setUp()
+
+
+    def test_retrieve_own_profile(self):
+        """Tests retrieving own user profile"""
+
+        USER_DETAIL_URL = reverse('users-detail', kwargs={'pk':self.user.id})
+
+        response = self.client.get(USER_DETAIL_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data,
+            {
+                'id' : self.user.id,
+                'email' : self.user.email,
+                'name' : self.user.name
+            })
+
+
+    def test_patch_own_user_name(self):
+        """Tests if authenticated user can PATCH their own name"""
+
+        USER_DETAIL_URL = reverse('users-detail', kwargs={'pk':self.user.id})
+
+        payload = {
+            'name' : 'patched testname'
+        }
+        response = self.client.patch(USER_DETAIL_URL,payload)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data,
+            {
+                'id' : self.user.id,
+                'email' : self.user.email,
+                'name' : payload['name']
+            })
+
+
+    def test_user_unable_to_patch_other_users_name(self):
+        """
+        creates a new user. The original authenticated user tries to patch their name.
+        Tests if this PATCH request fails.
+
+        """
+        user_2_details = {
+            'email':'user2@example.com',
+            'name':'test name 2',
+            'password':'testpassword2'
+            }
+
+        create_user(**user_2_details)
+
+        user_2 = get_user_model().objects.get(email = user_2_details['email'])
+
+        USER_DETAIL_URL = reverse('users-detail', kwargs={'pk':user_2.id})
+
+        payload = {
+            'name':'fail name'
+        }
+
+        response = self.client.patch(USER_DETAIL_URL, payload)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+    def test_user_deletes_other_users_fail(self):
+        """
+        Creates a new user. Original authenticated user attempts
+        to delete the new user. Tests that delete fails
+
+        """
+        user_2_details = {
+            'email':'user2@example.com',
+            'name':'test name 2',
+            'password':'testpassword2'
+            }
+
+        create_user(**user_2_details)
+
+        user_2 = get_user_model().objects.get(email = user_2_details['email'])
+        USER_DETAIL_URL = reverse('users-detail', kwargs={'pk':user_2.id})
+
+        response = self.client.delete(USER_DETAIL_URL)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+    def test_user_deletes_own_profile(self):
+        """
+        User attempts to delete own profile
+        Tests if delete is successful
+
+        Client attempts to GET that profile
+        Tests if GET fails
+
+        """
+        USER_DETAIL_URL = reverse('users-detail', kwargs={'pk':self.user.id})
+
+        response = self.client.delete(USER_DETAIL_URL)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.get(USER_DETAIL_URL)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
 
