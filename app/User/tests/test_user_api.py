@@ -227,6 +227,7 @@ class PrivateUserApiTests(APITestCase):
             'name' : 'patched testname'
         }
         response = self.client.patch(USER_DETAIL_URL,payload)
+        self.user.refresh_from_db()
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data,
@@ -263,7 +264,7 @@ class PrivateUserApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-    def test_user_deletes_other_users_fail(self):
+    def test_user_unable_to_delete_other_users(self):
         """
         Creates a new user. Original authenticated user attempts
         to delete the new user. Tests that delete fails
