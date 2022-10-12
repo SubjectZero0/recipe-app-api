@@ -2,7 +2,7 @@ from enum import unique
 from django.db import models
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-
+from django.conf import settings
 
 # Create your models here.
 
@@ -50,3 +50,20 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+############################################################
+
+class Recipe(models.Model):
+    """Recipes Model"""
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE, related_name = 'recipes')
+    recipe_title = models.CharField(max_length = 100)
+    recipe_description = models.TextField()
+    cuisine = models.CharField(max_length = 100)
+    vegan = models.BooleanField()
+    vegeterian = models.BooleanField()
+    suitable_for_diabetics = models.BooleanField()
+    recipe_instructions = models.TextField()
+
+    def __str__(self):
+        return self.recipe_title
