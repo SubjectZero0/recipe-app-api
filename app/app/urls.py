@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from User import views
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 router = routers.DefaultRouter()
 router.register('users', views.UserViewSet, basename = 'users')
@@ -25,6 +26,8 @@ router.register('users', views.UserViewSet, basename = 'users')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    path('', include('User.urls'))
+    path('', include('User.urls')),
+    path('api/schema/', SpectacularAPIView.as_view(), name = 'api-schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='api-schema'), name='api-docs'),
 
 ]
