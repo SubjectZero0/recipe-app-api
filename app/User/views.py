@@ -13,7 +13,12 @@ from .permissions import UpdateSelfUserPermissions
 # Create your views here.
 
 class UserViewSet(ModelViewSet):
-    """Handles User requests"""
+    """
+    Handles User requests
+    User has to be authenticated with token
+    to update or delete their account.
+    Everyone can retrieve and create users
+    """
 
     queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
@@ -24,7 +29,7 @@ class UserViewSet(ModelViewSet):
 
 
 class UserLoginApiView(ObtainAuthToken):
-    """Handles User Login"""
+    """Handles User Login (token retrieval)"""
 
     serializer_class = UserLoginSerializer
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
