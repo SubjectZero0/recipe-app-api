@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 
 
 class CustomUserModelTests(TestCase):
-    """Tests models"""
+    """Tests model for Custom User"""
 
     def test_create_user_with_email_success(self):
         """Test if the user instance creation is succesfull"""
