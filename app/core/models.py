@@ -54,16 +54,33 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
 ############################################################
 
 class Recipe(models.Model):
-    """Recipes Model"""
-
+    """
+    Recipes Model
+    Recipes are created by authenticated users
+    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE, related_name = 'recipes')
     recipe_title = models.CharField(max_length = 100)
     recipe_description = models.TextField()
-    cuisine = models.CharField(max_length = 100)
-    vegan = models.BooleanField()
-    vegeterian = models.BooleanField()
-    suitable_for_diabetics = models.BooleanField()
     recipe_instructions = models.TextField()
+    tags = models.ManyToManyField('core.Tag', blank = True)
 
     def __str__(self):
         return self.recipe_title
+
+#############################################################
+
+class Tag(models.Model):
+    """
+    Tag model for adding to recipes
+    Tags are created by authenticated users
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE, related_name = 'tags')
+    tag_name = models.CharField(max_length = 100)
+
+    def __str__(self):
+        return self.tag_name
+
+
+
+
+
