@@ -56,10 +56,6 @@ class PublicRecipeApiTests(APITestCase):
         payload = {
         'recipe_title':'Test Recipe',
         'recipe_description':'Test description',
-        'cuisine':'French',
-        'vegan':True,
-        'vegeterian':True,
-        'suitable_for_diabetics':False,
         'recipe_instructions':"test instructions",
         }
         response = self.client.post(RECIPE_LIST_URL,payload)
@@ -74,10 +70,6 @@ class PublicRecipeApiTests(APITestCase):
         recipe_details = {
         'recipe_title':'Test Recipe',
         'recipe_description':'Test description',
-        'cuisine':'French',
-        'vegan':True,
-        'vegeterian':True,
-        'suitable_for_diabetics':False,
         'recipe_instructions':"test instructions",
         }
         user = get_user_model().objects.get(email='user@example.com')
@@ -104,10 +96,6 @@ class PublicRecipeApiTests(APITestCase):
         recipe_details = {
         'recipe_title':'Test Recipe',
         'recipe_description':'Test description',
-        'cuisine':'French',
-        'vegan':True,
-        'vegeterian':True,
-        'suitable_for_diabetics':False,
         'recipe_instructions':"test instructions",
         }
         user = get_user_model().objects.get(email='user@example.com')
@@ -144,10 +132,6 @@ class PublicMyRecipeApiTests(APITestCase):
         recipe_details = {
         'recipe_title':'Test Recipe',
         'recipe_description':'Test description',
-        'cuisine':'French',
-        'vegan':True,
-        'vegeterian':True,
-        'suitable_for_diabetics':False,
         'recipe_instructions':"test instructions",
         }
 
@@ -160,8 +144,8 @@ class PublicMyRecipeApiTests(APITestCase):
         """
         Tests if unauthenticated user can retrieve their recipes
         """
-        with self.assertRaisesMessage(TypeError,"Field 'id' expected a number but got <django.contrib.auth.models.AnonymousUser object"):
-            self.client.get(MY_RECIPE_LIST_URL)
+        response = self.client.get(MY_RECIPE_LIST_URL)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 #############################################################################################################################################
 class PrivateRecipeApiTests(APITestCase):
@@ -186,10 +170,6 @@ class PrivateRecipeApiTests(APITestCase):
         recipe_details = {
         'recipe_title':'Test Recipe',
         'recipe_description':'Test description',
-        'cuisine':'French',
-        'vegan':True,
-        'vegeterian':True,
-        'suitable_for_diabetics':False,
         'recipe_instructions':"test instructions",
         }
 
@@ -206,10 +186,6 @@ class PrivateRecipeApiTests(APITestCase):
         payload = {
         'recipe_title':'Test Recipe 2',
         'recipe_description':'Test description2',
-        'cuisine':'French',
-        'vegan':True,
-        'vegeterian':True,
-        'suitable_for_diabetics':False,
         'recipe_instructions':"test instructions 2",
         }
 
@@ -310,10 +286,6 @@ class PrivateMyRecipeApiTests(APITestCase):
         recipe_details = {
         'recipe_title':'Test Recipe',
         'recipe_description':'Test description',
-        'cuisine':'French',
-        'vegan':True,
-        'vegeterian':True,
-        'suitable_for_diabetics':False,
         'recipe_instructions':"test instructions",
         }
 
