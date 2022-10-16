@@ -18,13 +18,14 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from User.views import UserViewSet
-from Recipe.views import RecipeApiViewset, MyRecipesApiViewset
+from Recipe.views import RecipeApiViewset, MyRecipesApiViewset, TagsModelViewset
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 router = routers.DefaultRouter()
 router.register('users', UserViewSet, basename = 'users')
 router.register('recipes',RecipeApiViewset, basename = 'recipes' )
 router.register('my_recipes', MyRecipesApiViewset, basename='my_recipes')
+router.register('tags', TagsModelViewset, basename = 'tags')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
