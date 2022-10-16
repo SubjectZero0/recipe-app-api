@@ -13,9 +13,9 @@ from rest_framework.viewsets import ModelViewSet
 
 class RecipeApiViewset(ModelViewSet):
     """
-    Handles All Recipe API requests
+    Handles All Recipe API requests.
     User has to be authenticated to create update and delete.
-    User can only update and delete the recipes they have created
+    User can only update and delete the recipes they have created.
     """
     queryset = Recipe.objects.all()#Users can GET all recipes
     serializer_class = RecipeSerializer
@@ -32,16 +32,16 @@ class RecipeApiViewset(ModelViewSet):
 
     def perform_create(self, serializer):
         """
-        Creates a recipe instance with 'user'= the user that makes the request
-        Automatically GETS the token authenticated user
+        Creates a recipe instance with 'user'= the user that makes the request.
+        Automatically GETS the token authenticated user.
         """
         serializer.save(user=self.request.user)
         return super().perform_create(serializer)
 
     def perform_update(self, serializer):
         """
-        Updates a recipe instance with 'user'= the user that makes the request
-        Automatically GETS the token authenticated user
+        Updates a recipe instance with 'user'= the user that makes the request.
+        Automatically GETS the token authenticated user.
         """
         instance = serializer.save(user=self.request.user)
         return instance
@@ -50,12 +50,11 @@ class RecipeApiViewset(ModelViewSet):
 class MyRecipesApiViewset(ModelViewSet):
     """
     Handles My Recipe API requests.
-    User has to be authenticated and can only GET their own recipes
+    User has to be authenticated and can only GET their own recipes.
     User has to be authenticated to create update and delete.
-    User can only update and delete the recipes they have created
+    User can only update and delete the recipes they have created.
     """
 
-    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = [UpdateMyRecipesPermissions]
     authentication_classes = [TokenAuthentication]
@@ -76,16 +75,16 @@ class MyRecipesApiViewset(ModelViewSet):
 
     def perform_create(self, serializer):
         """
-        Creates a recipe instance with 'user'= the user that makes the request
-        Automatically GETS the token authenticated user
+        Creates a recipe instance with 'user'= the user that makes the request.
+        Automatically GETS the token authenticated user.
         """
         serializer.save(user=self.request.user)
         return super().perform_create(serializer)
 
     def perform_update(self, serializer):
         """
-        Updates a recipe instance with 'user'= the user that makes the request
-        Automatically GETS the token authenticated user
+        Updates a recipe instance with 'user'= the user that makes the request.
+        Automatically GETS the token authenticated user.
         """
         instance = serializer.save(user=self.request.user)
         return instance
