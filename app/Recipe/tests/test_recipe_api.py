@@ -8,6 +8,7 @@ from core.models import Recipe
 
 RECIPE_LIST_URL = reverse('recipes-list')
 MY_RECIPE_LIST_URL = reverse('my_recipes-list')
+TAGS_LIST_URL = reverse('tags-list')
 
 def create_user(**params):
     """Helper function to create a user with variable parameters"""
@@ -171,6 +172,7 @@ class PrivateRecipeApiTests(APITestCase):
         'recipe_title':'Test Recipe',
         'recipe_description':'Test description',
         'recipe_instructions':"test instructions",
+
         }
 
         self.recipe = create_recipe(self.user, **recipe_details)
@@ -186,7 +188,7 @@ class PrivateRecipeApiTests(APITestCase):
         payload = {
         'recipe_title':'Test Recipe 2',
         'recipe_description':'Test description2',
-        'recipe_instructions':"test instructions 2",
+        'recipe_instructions':"test instructions 2"
         }
 
         response = self.client.post(RECIPE_LIST_URL, payload)
@@ -261,6 +263,33 @@ class PrivateRecipeApiTests(APITestCase):
         RECIPE_DETAIL_URL = reverse('recipes-detail', kwargs={'pk':self.recipe.id})#get the recipe detail that belongs to self.user
         response = self.client.delete(RECIPE_DETAIL_URL)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_create_my_recipe_with_tag(self):
+        """
+        Tests creating a recipe instance with tags.
+        Tests if the tag also gets created in the Tag API.
+        """
+        payload = {
+        'recipe_title':'Test Recipe3',
+        'recipe_description':'Test description3',
+        'recipe_instructions':"test instructions3",
+        'tags':[{'tag_name':'Vegeterian'}, {'tag_name':'French'}]
+        }
+
+        response = self.client.post(MY_RECIPE_LIST_URL, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        recipe = Recipe.objects.get(recipe_title = 'Test Recipe3')
+        RECIPE_DETAIL_URL = reverse('recipes-detail', kwargs={'pk':recipe.id})
+        response = self.client.get(RECIPE_DETAIL_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, 'Vegeterian')
+        self.assertContains(response, 'French')
+
+        response = self.client.get(TAGS_LIST_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['tag_name'], 'Vegeterian')
+        self.assertEqual(response.data[1]['tag_name'], 'French')
 
 #########################################################################################################################################################
 
@@ -346,11 +375,32 @@ class PrivateMyRecipeApiTests(APITestCase):
         response = self.client.delete(MY_RECIPE_DETAIL_URL)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
+    def test_create_my_recipe_with_tag(self):
+        """
+        Tests creating a my_recipe instance with tags.
+        Tests if the tag also gets created in the Tag API.
+        """
+        payload = {
+        'recipe_title':'Test Recipe3',
+        'recipe_description':'Test description3',
+        'recipe_instructions':"test instructions3",
+        'tags':[{'tag_name':'vegan'}, {'tag_name':'Chinese'}]
+        }
 
+        response = self.client.post(MY_RECIPE_LIST_URL, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
+        recipe = Recipe.objects.get(recipe_title = 'Test Recipe3')
+        MY_RECIPE_DETAIL_URL = reverse('my_recipes-detail', kwargs={'pk':recipe.id})
+        response = self.client.get(MY_RECIPE_DETAIL_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, 'vegan')
+        self.assertContains(response, 'Chinese')
 
-
-
+        response = self.client.get(TAGS_LIST_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['tag_name'], 'vegan')
+        self.assertEqual(response.data[1]['tag_name'], 'Chinese')
 
 
 
