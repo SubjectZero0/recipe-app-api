@@ -71,8 +71,8 @@ class Recipe(models.Model):
 
 class Tag(models.Model):
     """
-    Tag model for adding to recipes
-    Tags are created by authenticated users
+    Tag model for adding to recipes.
+    Tags are created by authenticated users.
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete = models.CASCADE, related_name = 'tags')
     tag_name = models.CharField(max_length = 100)
