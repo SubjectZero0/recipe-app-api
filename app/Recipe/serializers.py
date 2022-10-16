@@ -1,13 +1,12 @@
-from rest_framework import serializers
-from rest_framework.serializers import ModelSerializer,Serializer
+from rest_framework.serializers import ModelSerializer
 from core.models import Recipe, Tag
-from django.contrib.auth import get_user_model
+
 
 
 class RecipeTagSerializer(ModelSerializer):
     """
-    Serializer for user's recipe tags
-    Only want to show tag_name
+    Serializer for user's recipes tags
+
     """
     class Meta:
         model = Tag
@@ -15,9 +14,13 @@ class RecipeTagSerializer(ModelSerializer):
         read_only_fields =['id']
 
 class RecipeSerializer(ModelSerializer):
-    """Serializer for Recipe API"""
+    """
+    Serializer for Recipes.
+    Automatic Tag creation and update in Tag API
+    through many-to-many relationship
+    """
 
-    tags = RecipeTagSerializer(many=True, required = False)
+    tags = RecipeTagSerializer(many=True, required = False) #use of nested serializer
 
     class Meta:
         model = Recipe
@@ -29,6 +32,7 @@ class RecipeSerializer(ModelSerializer):
 
     def _get_or_create_tags(self, tags, recipe):
         """
+        Helper Function.
         Get or create tags, if non exist.
         ADDS the new tags in the recipe.
         """
@@ -55,7 +59,7 @@ class RecipeSerializer(ModelSerializer):
 
         tags = validated_data.pop('tags', []) #if any tags are passed into the serializer, removes them and places them in tags variable. Else its an empty list.
         recipe = Recipe.objects.create(**validated_data) #creates a recipe with the rest of the validated data.
-        self._get_or_create_tags(tags, recipe)
+        self._get_or_create_tags(tags, recipe)#calls helper function to get or create tags and ADD them to recipe.
 
         return recipe
 
@@ -63,13 +67,21 @@ class RecipeSerializer(ModelSerializer):
         """
         As with creation, custom method for updating recipe
         """
-        tags = validated_data.pop('tags', None)
+        tags = validated_data.pop('tags', None)#if any tags are passed into the serializer, removes them and places them in tags variable.
 
         if tags is not None:
+            """
+            if tags exist, clears them.
+            Calls helper function to create tags and ADD them to instance(recipe)
+            """
             instance.tags.clear()
             self._get_or_create_tags(tags, instance)
 
         for attr, value in validated_data.items():
+            """
+            Sets the attributes of the instance to the new values.
+            This is the updating part.
+            """
             setattr(instance, attr, value)
 
         instance.save()
