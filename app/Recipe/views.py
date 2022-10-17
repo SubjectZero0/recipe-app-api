@@ -27,8 +27,7 @@ class RecipeApiViewset(ModelViewSet):
     filter_backends = [SearchFilter]
     search_fields = [
         'recipe_title',
-        'cuisine',
-        'tags'
+        'recipe_description',
         ]
 
     def perform_create(self, serializer):
@@ -63,8 +62,7 @@ class MyRecipesApiViewset(ModelViewSet):
 
     search_fields = [
         'recipe_title',
-        'cuisine',
-        'tags'
+        'recipe_description',
         ]
 
     def get_queryset(self):
