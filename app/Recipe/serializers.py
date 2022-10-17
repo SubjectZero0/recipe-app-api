@@ -5,7 +5,9 @@ from core.models import Recipe, Tag
 
 class RecipeTagSerializer(ModelSerializer):
     """
-    Serializer for user's recipes tags
+    Serializer for user's recipes tags.
+    Tags can be created through creating a recipe with tags,
+    or by the Tag API.
 
     """
     class Meta:
@@ -16,8 +18,8 @@ class RecipeTagSerializer(ModelSerializer):
 class RecipeSerializer(ModelSerializer):
     """
     Serializer for Recipes.
-    Automatic Tag creation and update in Tag API
-    through many-to-many relationship
+    Automatic Tag creation and update in Tag API,
+    through many-to-many relationship.
     """
 
     tags = RecipeTagSerializer(many=True, required = False) #use of nested serializer
