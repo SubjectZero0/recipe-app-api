@@ -2,7 +2,7 @@ from rest_framework import status
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
-from core.models import Recipe
+from core.models import Recipe, Tag
 
 
 
@@ -264,22 +264,22 @@ class PrivateRecipeApiTests(APITestCase):
         response = self.client.delete(RECIPE_DETAIL_URL)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_create_my_recipe_with_tag(self):
+    def test_create_recipe_with_tags(self):
         """
         Tests creating a recipe instance with tags.
         Tests if the tag also gets created in the Tag API.
         """
         payload = {
-        'recipe_title':'Test Recipe3',
-        'recipe_description':'Test description3',
-        'recipe_instructions':"test instructions3",
+        'recipe_title':'Testing Recipe',
+        'recipe_description':'Test description',
+        'recipe_instructions':"test instructions",
         'tags':[{'tag_name':'Vegeterian'}, {'tag_name':'French'}]
         }
 
         response = self.client.post(MY_RECIPE_LIST_URL, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        recipe = Recipe.objects.get(recipe_title = 'Test Recipe3')
+        recipe = Recipe.objects.get(recipe_title = 'Testing Recipe')
         RECIPE_DETAIL_URL = reverse('recipes-detail', kwargs={'pk':recipe.id})
         response = self.client.get(RECIPE_DETAIL_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -375,7 +375,7 @@ class PrivateMyRecipeApiTests(APITestCase):
         response = self.client.delete(MY_RECIPE_DETAIL_URL)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_create_my_recipe_with_tag(self):
+    def test_create_my_recipe_with_tags(self):
         """
         Tests creating a my_recipe instance with tags.
         Tests if the tag also gets created in the Tag API.
@@ -403,6 +403,33 @@ class PrivateMyRecipeApiTests(APITestCase):
         self.assertEqual(response.data[1]['tag_name'], 'Chinese')
 
 
+    def test_update_my_recipe_with_tags(self):
+        """
+        Tests updating tags in a recipe.
+        Tests if new tag is created in Tag API.
+        """
+        payload = {
+        'recipe_title':'Test Recipe4',
+        'recipe_description':'Test description4',
+        'recipe_instructions':"test instructions4",
+        'tags':[{'tag_name':'vegan'}, {'tag_name':'Chinese'}]
+        }
+
+        self.client.post(MY_RECIPE_LIST_URL, payload, format='json')
+        recipe = Recipe.objects.get(recipe_title='Test Recipe4')
+        MY_RECIPE_DETAIL_URL = reverse('my_recipes-detail', kwargs={'pk':recipe.id})
 
 
 
+        payload = {
+            'tags' : [{'tag_name':'Vegeterian'}, {'tag_name':'Chinese'}]
+        }
+
+        response = self.client.patch(MY_RECIPE_DETAIL_URL, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, 'Vegeterian')
+        self.assertContains(response, 'Chinese')
+        self.assertEqual(recipe.tags.count(), 2)
+
+        response = self.client.get(TAGS_LIST_URL)
+        self.assertContains(response, 'Vegeterian')
