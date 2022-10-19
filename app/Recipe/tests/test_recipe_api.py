@@ -291,6 +291,37 @@ class PrivateRecipeApiTests(APITestCase):
         self.assertEqual(response.data[0]['tag_name'], 'Vegeterian')
         self.assertEqual(response.data[1]['tag_name'], 'French')
 
+    def test_update_recipe_with_tags(self):
+        """
+        Tests updating tags in a recipe.
+        Tests if new tag is created in Tag API.
+        """
+        payload = {
+        'recipe_title':'Test Recipe5',
+        'recipe_description':'Test description5',
+        'recipe_instructions':"test instructions5",
+        'tags':[{'tag_name':'vegan'}, {'tag_name':'Chinese'}]
+        }
+
+        self.client.post(RECIPE_LIST_URL, payload, format='json')
+        recipe = Recipe.objects.get(recipe_title='Test Recipe5')
+        RECIPE_DETAIL_URL = reverse('my_recipes-detail', kwargs={'pk':recipe.id})
+
+
+
+        payload = {
+            'tags' : [{'tag_name':'Vegeterian'}, {'tag_name':'Chinese'}]
+        }
+
+        response = self.client.patch(RECIPE_DETAIL_URL, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, 'Vegeterian')
+        self.assertContains(response, 'Chinese')
+        self.assertEqual(recipe.tags.count(), 2)
+
+        response = self.client.get(TAGS_LIST_URL)
+        self.assertContains(response, 'Vegeterian')
+
 #########################################################################################################################################################
 
 class PrivateMyRecipeApiTests(APITestCase):
