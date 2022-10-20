@@ -87,7 +87,7 @@ class RecipeSerializer(ModelSerializer):
         nested serializers, since direct creation
         with nested serializers/manytomany is not allowed.
         If a Tag/Ingredient doesnt exist in the appropriate table,
-        it will be created, and will be available in the Tag API.
+        it will be created, and will be available in the Tag/Ingredient API.
         """
 
         tags = validated_data.pop('tags', []) #if any tags are passed into the serializer, removes them and places them in tags variable. Else its an empty list.
