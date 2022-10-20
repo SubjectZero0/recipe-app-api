@@ -1,7 +1,7 @@
 from django.shortcuts import render
 
-from core.models import Recipe, Tag
-from .serializers import RecipeSerializer, RecipeTagSerializer
+from core.models import Ingredient, Recipe, Tag
+from .serializers import RecipeSerializer, RecipeTagSerializer, RecipeIngredientSerializer
 from .permissions import UpdateMyRecipesPermissions
 
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
@@ -106,6 +106,37 @@ class TagsModelViewset(ModelViewSet):
         the user has created
         """
         query = Tag.objects.filter(user=self.request.user)
+        return query
+
+    def perform_create(self, serializer):
+        """
+        Creates a tag instance with 'user'= the user that makes the request.
+        Automatically GETS the token authenticated user.
+        """
+        serializer.save(user=self.request.user)
+        return super().perform_create(serializer)
+
+    def perform_update(self, serializer):
+        """
+        Updates a tag instance with 'user'= the user that makes the request.
+        Automatically GETS the token authenticated user.
+        """
+        instance = serializer.save(user=self.request.user)
+        return instance
+
+class IngredientsModelViewset(ModelViewSet):
+    queryset = Ingredient.objects.all()
+    serializer_class = RecipeIngredientSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+
+    def get_queryset(self):
+        """
+        The queryset is modified to only look for the recipes
+        the user has created.
+        """
+        query = Ingredient.objects.filter(user=self.request.user)
         return query
 
     def perform_create(self, serializer):
