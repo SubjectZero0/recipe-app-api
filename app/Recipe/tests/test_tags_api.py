@@ -63,7 +63,7 @@ class PrivateTagApiTests(APITestCase):
         payload = {
             'tag_name' : 'LOLwut?'
         }
-        response = self.client.post(TAG_LIST_URL, payload)
+        response = self.client.post(TAG_LIST_URL, payload, format='json')
         tag = Tag.objects.get(tag_name = 'LOLwut?')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data,{'id':tag.id, 'tag_name': tag.tag_name})
@@ -81,7 +81,7 @@ class PrivateTagApiTests(APITestCase):
         payload = {
             'tag_name':'new master tag'
         }
-        response = self.client.patch(TAG_DETAIL_URL, payload)
+        response = self.client.patch(TAG_DETAIL_URL, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data,{'id':tag.id, 'tag_name': payload['tag_name']})
 
