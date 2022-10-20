@@ -23,11 +23,10 @@ class RecipeIngredientSerializer(ModelSerializer):
     Ingredients can be created through creating recipes
     with ingredients, or through the Ingredient API.
     """
-    quantity_used = serializers.CharField(max_length = 100)
 
     class Meta:
         model = Ingredient
-        fields = ['id', 'ingredient_name', 'quantity_used']
+        fields = ['id', 'ingredient_name']
         read_only_fields = ['id']
 
 
