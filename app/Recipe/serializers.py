@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from core.models import Recipe, Tag, Ingredient
-from rest_framework import serializers
+
 
 
 
@@ -19,7 +19,7 @@ class RecipeTagSerializer(ModelSerializer):
 
 class RecipeIngredientSerializer(ModelSerializer):
     """
-    Serializer for user's recipes' ingresients.
+    Serializer for user's recipes' ingredients.
     Ingredients can be created through creating recipes
     with ingredients, or through the Ingredient API.
     """
@@ -72,7 +72,7 @@ class RecipeSerializer(ModelSerializer):
         """
         Helper function.
         Get, or create ingredients, if non exist.
-        ADDS the new tags in the recipe.
+        ADDS the new ingredients in the recipe.
         """
         authenticated_user = self.context['request'].user
 
