@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 from core.models import Ingredient, Recipe, Tag
 from .serializers import RecipeSerializer, RecipeTagSerializer, RecipeIngredientSerializer
 from .permissions import UpdateMyRecipesPermissions
@@ -11,20 +9,15 @@ from rest_framework.viewsets import ModelViewSet
 
 # Create your views here.
 
-class RecipeApiViewset(ModelViewSet):
+class BaseRecipeViewSet(ModelViewSet):
     """
-    Handles All Recipe API requests.
-    User has to be authenticated to create update and delete.
-    User can only update and delete the recipes they have created.
+    Base Viewset for Recipe API.
     """
     queryset = Recipe.objects.all()#Users can GET all recipes
     serializer_class = RecipeSerializer
-
-    #User has to be authenticated to create. They can only update their own recipes
-    permission_classes = [IsAuthenticatedOrReadOnly, UpdateMyRecipesPermissions]
-
     authentication_classes = [TokenAuthentication]
     filter_backends = [SearchFilter]
+
     search_fields = [
         'recipe_title',
         'recipe_description',
@@ -46,24 +39,25 @@ class RecipeApiViewset(ModelViewSet):
         instance = serializer.save(user=self.request.user)
         return instance
 
+class RecipeApiViewset(BaseRecipeViewSet):
+    """
+    Handles All Recipe API requests.
+    Inherits from BaseRecipeViewSet.
+    User has to be authenticated to create update and delete.
+    User can only update and delete the recipes they have created.
+    """
+    #User has to be authenticated to create. They can only update their own recipes
+    permission_classes = [IsAuthenticatedOrReadOnly, UpdateMyRecipesPermissions]
 
-class MyRecipesApiViewset(ModelViewSet):
+class MyRecipesApiViewset(BaseRecipeViewSet):
     """
     Handles My Recipe API requests.
+    Inherits from BaseRecipeViewSet.
     User has to be authenticated and can only GET their own recipes.
     User has to be authenticated to create update and delete.
     User can only update and delete the recipes they have created.
     """
-    queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
     permission_classes = [IsAuthenticated,UpdateMyRecipesPermissions]
-    authentication_classes = [TokenAuthentication]
-    filter_backends = [SearchFilter]
-
-    search_fields = [
-        'recipe_title',
-        'recipe_description',
-        ]
 
     def get_queryset(self):
         """
@@ -73,9 +67,18 @@ class MyRecipesApiViewset(ModelViewSet):
         query = Recipe.objects.filter(user=self.request.user)
         return query
 
+##################################################################################
+
+class BaseRecipeAttrsViewSet(ModelViewSet):
+    """
+    Base viewset for Tag and Ingredient APIs.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
     def perform_create(self, serializer):
         """
-        Creates a recipe instance with 'user'= the user that makes the request.
+        Creates a tag instance with 'user'= the user that makes the request.
         Automatically GETS the token authenticated user.
         """
         serializer.save(user=self.request.user)
@@ -83,22 +86,21 @@ class MyRecipesApiViewset(ModelViewSet):
 
     def perform_update(self, serializer):
         """
-        Updates a recipe instance with 'user'= the user that makes the request.
+        Updates a tag instance with 'user'= the user that makes the request.
         Automatically GETS the token authenticated user.
         """
         instance = serializer.save(user=self.request.user)
         return instance
 
 
-class TagsModelViewset(ModelViewSet):
+class TagsModelViewset(BaseRecipeAttrsViewSet):
     """
     Handles Tag API requests.
+    Inherits from BaseRecipeAttrsViewSet.
     User must be authenticated to create, read, update, delete.
     """
     queryset = Tag.objects.all()
     serializer_class = RecipeTagSerializer
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
 
     def get_queryset(self):
         """
@@ -108,28 +110,15 @@ class TagsModelViewset(ModelViewSet):
         query = Tag.objects.filter(user=self.request.user)
         return query
 
-    def perform_create(self, serializer):
-        """
-        Creates a tag instance with 'user'= the user that makes the request.
-        Automatically GETS the token authenticated user.
-        """
-        serializer.save(user=self.request.user)
-        return super().perform_create(serializer)
 
-    def perform_update(self, serializer):
-        """
-        Updates a tag instance with 'user'= the user that makes the request.
-        Automatically GETS the token authenticated user.
-        """
-        instance = serializer.save(user=self.request.user)
-        return instance
-
-class IngredientsModelViewset(ModelViewSet):
+class IngredientsModelViewset(BaseRecipeAttrsViewSet):
+    """
+    Handles Ingredient API requests.
+    Inherits from BaseRecipeAttrsViewSet.
+    User must be authenticated to create, read, update, delete.
+    """
     queryset = Ingredient.objects.all()
     serializer_class = RecipeIngredientSerializer
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [TokenAuthentication]
-
 
     def get_queryset(self):
         """
@@ -139,18 +128,3 @@ class IngredientsModelViewset(ModelViewSet):
         query = Ingredient.objects.filter(user=self.request.user)
         return query
 
-    def perform_create(self, serializer):
-        """
-        Creates a tag instance with 'user'= the user that makes the request.
-        Automatically GETS the token authenticated user.
-        """
-        serializer.save(user=self.request.user)
-        return super().perform_create(serializer)
-
-    def perform_update(self, serializer):
-        """
-        Updates a tag instance with 'user'= the user that makes the request.
-        Automatically GETS the token authenticated user.
-        """
-        instance = serializer.save(user=self.request.user)
-        return instance
