@@ -104,7 +104,7 @@ class TagsModelViewset(BaseRecipeAttrsViewSet):
 
     def get_queryset(self):
         """
-        The queryset is modified to only look for the recipes
+        The queryset is modified to only look for the tags
         the user has created
         """
         query = Tag.objects.filter(user=self.request.user)
@@ -122,7 +122,7 @@ class IngredientsModelViewset(BaseRecipeAttrsViewSet):
 
     def get_queryset(self):
         """
-        The queryset is modified to only look for the recipes
+        The queryset is modified to only look for the ingredients
         the user has created.
         """
         query = Ingredient.objects.filter(user=self.request.user)
