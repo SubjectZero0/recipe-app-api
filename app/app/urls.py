@@ -16,6 +16,10 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls import static
+from django.conf import settings
+
+
 from rest_framework import routers
 from User.views import UserViewSet
 from Recipe.views import RecipeApiViewset, MyRecipesApiViewset, TagsModelViewset, IngredientsModelViewset
@@ -36,3 +40,12 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='api-schema'), name='api-docs'),
 
 ]
+
+if settings.DEBUG:
+    """
+    Only in dev mode - Serve media files
+    """
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root = settings.MEDIA_ROOT,
+    )
