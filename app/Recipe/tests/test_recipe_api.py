@@ -1,14 +1,17 @@
+from enum import unique
+from typing import OrderedDict
 from rest_framework import status
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
-from core.models import Recipe, Tag
+from core.models import Ingredient, Recipe, Tag
 
 
 
 RECIPE_LIST_URL = reverse('recipes-list')
 MY_RECIPE_LIST_URL = reverse('my_recipes-list')
 TAGS_LIST_URL = reverse('tags-list')
+INGREDIENT_LIST_URL = reverse('ingredients-list')
 
 def create_user(**params):
     """Helper function to create a user with variable parameters"""
@@ -270,16 +273,16 @@ class PrivateRecipeApiTests(APITestCase):
         Tests if the tag also gets created in the Tag API.
         """
         payload = {
-        'recipe_title':'Testing Recipe',
+        'recipe_title':'Test creating Recipe with Tags',
         'recipe_description':'Test description',
         'recipe_instructions':"test instructions",
         'tags':[{'tag_name':'Vegeterian'}, {'tag_name':'French'}]
         }
 
-        response = self.client.post(MY_RECIPE_LIST_URL, payload, format='json')
+        response = self.client.post(RECIPE_LIST_URL, payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        recipe = Recipe.objects.get(recipe_title = 'Testing Recipe')
+        recipe = Recipe.objects.get(recipe_title = 'Test creating Recipe with Tags')
         RECIPE_DETAIL_URL = reverse('recipes-detail', kwargs={'pk':recipe.id})
         response = self.client.get(RECIPE_DETAIL_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -297,17 +300,15 @@ class PrivateRecipeApiTests(APITestCase):
         Tests if new tag is created in Tag API.
         """
         payload = {
-        'recipe_title':'Test Recipe5',
+        'recipe_title':'Test Update Recipe with Tags',
         'recipe_description':'Test description5',
         'recipe_instructions':"test instructions5",
         'tags':[{'tag_name':'vegan'}, {'tag_name':'Chinese'}]
         }
 
         self.client.post(RECIPE_LIST_URL, payload, format='json')
-        recipe = Recipe.objects.get(recipe_title='Test Recipe5')
-        RECIPE_DETAIL_URL = reverse('my_recipes-detail', kwargs={'pk':recipe.id})
-
-
+        recipe = Recipe.objects.get(recipe_title='Test Update Recipe with Tags')
+        RECIPE_DETAIL_URL = reverse('recipes-detail', kwargs={'pk':recipe.id})
 
         payload = {
             'tags' : [{'tag_name':'Vegeterian'}, {'tag_name':'Chinese'}]
@@ -322,7 +323,64 @@ class PrivateRecipeApiTests(APITestCase):
         response = self.client.get(TAGS_LIST_URL)
         self.assertContains(response, 'Vegeterian')
 
-#########################################################################################################################################################
+    def test_create_recipe_with_ingredients(self):
+        """
+        Tests creating a recipe with ingredients.
+        Tests that the ingredient is also created in the Ingredient API.
+        """
+        payload = {
+        'recipe_title':'Testing Recipe with ingredient',
+        'recipe_description':'Test description',
+        'recipe_instructions':"test instructions",
+        'ingredients':[{'ingredient_name':'Beef'}, {'ingredient_name':'Olive oil'}]
+        }
+
+        response = self.client.post(RECIPE_LIST_URL, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.get(RECIPE_LIST_URL)
+        self.assertContains(response, 'Beef')
+        self.assertContains(response, 'Olive oil')
+        self.assertTrue(Ingredient.objects.filter(ingredient_name='Beef').exists())
+        self.assertTrue(Ingredient.objects.filter(ingredient_name='Olive oil').exists())
+
+        response = self.client.get(INGREDIENT_LIST_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    def test_update_recipe_with_ingredients(self):
+        """
+        Tests updating a recipe with ingredients.
+        Tests that the new ingredients are created in the Ingredient API.
+        """
+        recipe_details = {
+        'recipe_title':'Test Updating Recipe with ingredient',
+        'recipe_description':'Test description',
+        'recipe_instructions':"test instructions",
+        'ingredients':[{'ingredient_name':'Chicken'}, {'ingredient_name':'Tomatoes'}]
+        }
+        response = self.client.post(RECIPE_LIST_URL, recipe_details, format='json')
+        recipe = Recipe.objects.get(recipe_title='Test Updating Recipe with ingredient')
+        RECIPE_DETAIL_URL = reverse('my_recipes-detail', kwargs={'pk':recipe.id})
+
+        payload = {
+            'ingredients' : [{'ingredient_name':'Cucumber'}, {'ingredient_name':'Salmon'}]
+        }
+
+        response = self.client.patch(RECIPE_DETAIL_URL, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, 'Cucumber')
+        self.assertContains(response, 'Salmon')
+        self.assertEqual(recipe.ingredients.count(), 2)
+
+        self.assertTrue(Ingredient.objects.filter(ingredient_name='Cucumber').exists())
+        self.assertTrue(Ingredient.objects.filter(ingredient_name='Salmon').exists())
+        self.assertIs(Ingredient.objects.count(), 4)
+
+        response = self.client.get(INGREDIENT_LIST_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 4)
+
+################################################################################################################################################
 
 class PrivateMyRecipeApiTests(APITestCase):
     """
@@ -464,3 +522,60 @@ class PrivateMyRecipeApiTests(APITestCase):
 
         response = self.client.get(TAGS_LIST_URL)
         self.assertContains(response, 'Vegeterian')
+
+    def test_create_my_recipe_with_ingredients(self):
+        """
+        Tests creating a My_Recipe instance with ingredients.
+        Tests that the ingredient is also created in the Ingredient API.
+        """
+        payload = {
+        'recipe_title':'Testing My_Recipe with ingredient',
+        'recipe_description':'Test description',
+        'recipe_instructions':"test instructions",
+        'ingredients':[{'ingredient_name':'Beef'}, {'ingredient_name':'Olive oil'}]
+        }
+
+        response = self.client.post(MY_RECIPE_LIST_URL, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response = self.client.get(MY_RECIPE_LIST_URL)
+        self.assertContains(response, 'Beef')
+        self.assertContains(response, 'Olive oil')
+        self.assertTrue(Ingredient.objects.filter(ingredient_name='Beef').exists())
+        self.assertTrue(Ingredient.objects.filter(ingredient_name='Olive oil').exists())
+
+        response = self.client.get(INGREDIENT_LIST_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    def test_update_recipe_with_ingredients(self):
+        """
+        Tests updating a recipe with ingredients.
+        Tests that the new ingredients are created in the Ingredient API.
+        """
+        recipe_details = {
+        'recipe_title':'Test Updating Recipe with ingredient',
+        'recipe_description':'Test description',
+        'recipe_instructions':"test instructions",
+        'ingredients':[{'ingredient_name':'Chicken'}, {'ingredient_name':'Tomatoes'}]
+        }
+        response = self.client.post(MY_RECIPE_LIST_URL, recipe_details, format='json')
+        recipe = Recipe.objects.get(recipe_title='Test Updating Recipe with ingredient')
+        MY_RECIPE_DETAIL_URL = reverse('my_recipes-detail', kwargs={'pk':recipe.id})
+
+        payload = {
+            'ingredients' : [{'ingredient_name':'Cucumber'}, {'ingredient_name':'Salmon'}]
+        }
+
+        response = self.client.patch(MY_RECIPE_DETAIL_URL, payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, 'Cucumber')
+        self.assertContains(response, 'Salmon')
+        self.assertEqual(recipe.ingredients.count(), 2)
+
+        self.assertTrue(Ingredient.objects.filter(ingredient_name='Cucumber').exists())
+        self.assertTrue(Ingredient.objects.filter(ingredient_name='Salmon').exists())
+        self.assertIs(Ingredient.objects.count(), 4)
+
+        response = self.client.get(INGREDIENT_LIST_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 4)
