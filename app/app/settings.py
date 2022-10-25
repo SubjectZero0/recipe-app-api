@@ -127,8 +127,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/static'
-MEDIA_URL = 'static/media'
+STATIC_URL = 'static/static/'
+MEDIA_URL = 'static/media/'
 
 STATIC_ROOT= 'vol/web/static'
 MEDIA_ROOT = 'vol/web/media'
@@ -154,4 +154,5 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'A REST API for Cooking Recipes',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True
 }
