@@ -50,6 +50,12 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+
+def image_path(instance, filename):
+    """Function to explicitly create a path in MEDIA_ROOT for recipe images"""
+    return 'images/{filename}'.format(filename=filename)
+
+
 ############################################################
 
 class Recipe(models.Model):
@@ -63,6 +69,7 @@ class Recipe(models.Model):
     recipe_instructions = models.TextField()
     tags = models.ManyToManyField('core.Tag', blank = True)
     ingredients = models.ManyToManyField('core.Ingredient', blank = True)
+    image = models.ImageField(upload_to = image_path, height_field = None, width_field = None, max_length=200, blank = True, null = True)
 
     def __str__(self):
         return self.recipe_title
@@ -93,3 +100,6 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return self.ingredient_name
+
+#############################################################
+
