@@ -1,4 +1,5 @@
 from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
 from core.models import Recipe, Tag, Ingredient
 
 
@@ -30,6 +31,20 @@ class RecipeIngredientSerializer(ModelSerializer):
         read_only_fields = ['id']
 
 
+class RecipeImageSerializer(ModelSerializer):
+    """
+    Serializer for recipe image(s).
+    Images can only be uploaded by authenticated users.
+    Image upload requires recipe id (recipe detail).
+    """
+    class Meta:
+        model = Recipe
+        fields = ['id', 'image']
+        read_only_fields = ['id']
+        extra_kwargs = {
+            'image':{'required' : True}
+            }
+
 ###########################################################################################
 
 
@@ -42,7 +57,7 @@ class RecipeSerializer(ModelSerializer):
 
     tags = RecipeTagSerializer(many=True, required = False) #use of nested serializer
     ingredients = RecipeIngredientSerializer(many=True, required=False) #use of nested serializer
-
+    image = serializers.ImageField(required = False)
     class Meta:
         model = Recipe
         fields = '__all__'
@@ -102,7 +117,7 @@ class RecipeSerializer(ModelSerializer):
         """
         As with creation, custom method for updating recipe
         """
-        tags = validated_data.pop('tags', None)#if any tags are passed into the serializer, removes them and places them in tags variable.
+        tags = validated_data.pop('tags', None)
         ingredients = validated_data.pop('ingredients', None)
 
         if tags is not None:

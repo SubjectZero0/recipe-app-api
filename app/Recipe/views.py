@@ -1,20 +1,23 @@
+
 from core.models import Ingredient, Recipe, Tag
-from .serializers import RecipeSerializer, RecipeTagSerializer, RecipeIngredientSerializer
+from .serializers import RecipeSerializer, RecipeTagSerializer, RecipeIngredientSerializer, RecipeImageSerializer
 from .permissions import UpdateMyRecipesPermissions
 
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.filters import SearchFilter
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
 
 # Create your views here.
 
 class BaseRecipeViewSet(ModelViewSet):
     """
-    Base Viewset for Recipe API.
+    Base Viewset for Recipe and My_Recipe API.
     """
     queryset = Recipe.objects.all()#Users can GET all recipes
-    serializer_class = RecipeSerializer
     authentication_classes = [TokenAuthentication]
     filter_backends = [SearchFilter]
 
@@ -39,23 +42,54 @@ class BaseRecipeViewSet(ModelViewSet):
         instance = serializer.save(user=self.request.user)
         return instance
 
+    def get_serializer_class(self):
+        """
+        Method to get the correct serializer, depending
+        if the user wants to create/update a recipe,
+        or upload an image.
+        """
+        if self.action == 'upload_recipe_image':
+            serializer = RecipeImageSerializer
+        else:
+            serializer = RecipeSerializer
+        return serializer
+
+    @action(methods = ['POST'], detail = True, url_path = 'upload-image')
+    def upload_recipe_image(self, request, pk=None):
+        """
+        Custom 'POST' endpoint with custom url, for uploading a recipe image.
+        This action requires recipe id and a token authenticated user.
+        The only way to upload an image is through this action.
+        Any recipe created/updated through the recipe/my_recipe api (JSON) must not contain an image.
+        """
+        recipe = self.get_object()
+        serializer = self.get_serializer(recipe, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class RecipeApiViewset(BaseRecipeViewSet):
     """
-    Handles All Recipe API requests.
-    Inherits from BaseRecipeViewSet.
-    User has to be authenticated to create update and delete.
+    Handles All-Recipe API requests.
+    User has to be authenticated to create update and delete, but not to retrieve.
     User can only update and delete the recipes they have created.
+    Image field must not be contained in creation/update.
     """
     #User has to be authenticated to create. They can only update their own recipes
     permission_classes = [IsAuthenticatedOrReadOnly, UpdateMyRecipesPermissions]
 
 class MyRecipesApiViewset(BaseRecipeViewSet):
     """
-    Handles My Recipe API requests.
-    Inherits from BaseRecipeViewSet.
-    User has to be authenticated and can only GET their own recipes.
-    User has to be authenticated to create update and delete.
+    Handles My_Recipe API requests.
+    User has to be authenticated and can only retrieve their own recipes.
+    User has to be authenticated to create, update and delete.
     User can only update and delete the recipes they have created.
+    Image field must not be contained in creation/update.
+
     """
     permission_classes = [IsAuthenticated,UpdateMyRecipesPermissions]
 
@@ -96,7 +130,6 @@ class BaseRecipeAttrsViewSet(ModelViewSet):
 class TagsModelViewset(BaseRecipeAttrsViewSet):
     """
     Handles Tag API requests.
-    Inherits from BaseRecipeAttrsViewSet.
     User must be authenticated to create, read, update, delete.
     """
     queryset = Tag.objects.all()
@@ -114,7 +147,6 @@ class TagsModelViewset(BaseRecipeAttrsViewSet):
 class IngredientsModelViewset(BaseRecipeAttrsViewSet):
     """
     Handles Ingredient API requests.
-    Inherits from BaseRecipeAttrsViewSet.
     User must be authenticated to create, read, update, delete.
     """
     queryset = Ingredient.objects.all()
