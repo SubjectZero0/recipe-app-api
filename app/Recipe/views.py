@@ -60,7 +60,7 @@ class BaseRecipeViewSet(ModelViewSet):
         Custom 'POST' endpoint with custom url, for uploading a recipe image.
         This action requires recipe id and a token authenticated user.
         The only way to upload an image is through this action.
-        Any recipe created/updated through the recipe/my_recipe api (JSON) must not contain an image.
+
         """
         recipe = self.get_object()
         serializer = self.get_serializer(recipe, data=request.data)
@@ -77,7 +77,8 @@ class RecipeApiViewset(BaseRecipeViewSet):
     Handles All-Recipe API requests.
     User has to be authenticated to create update and delete, but not to retrieve.
     User can only update and delete the recipes they have created.
-    Image field must not be contained in creation/update.
+    Image field is read only. Go to '/api/recipes/{id}/image-upload,
+    to upload a recipe image.
     """
     #User has to be authenticated to create. They can only update their own recipes
     permission_classes = [IsAuthenticatedOrReadOnly, UpdateMyRecipesPermissions]
@@ -88,7 +89,8 @@ class MyRecipesApiViewset(BaseRecipeViewSet):
     User has to be authenticated and can only retrieve their own recipes.
     User has to be authenticated to create, update and delete.
     User can only update and delete the recipes they have created.
-    Image field must not be contained in creation/update.
+    Image field is read only. Go to '/api/my_recipes/{id}/image-upload,
+    to upload a recipe image.
 
     """
     permission_classes = [IsAuthenticated,UpdateMyRecipesPermissions]
