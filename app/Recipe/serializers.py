@@ -57,7 +57,7 @@ class RecipeSerializer(ModelSerializer):
 
     tags = RecipeTagSerializer(many=True, required = False) #use of nested serializer
     ingredients = RecipeIngredientSerializer(many=True, required=False) #use of nested serializer
-    image = serializers.ImageField(required = False)
+    image = serializers.ImageField(required = False, read_only = True)
     class Meta:
         model = Recipe
         fields = '__all__'
