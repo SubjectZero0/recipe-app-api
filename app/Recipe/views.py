@@ -54,7 +54,7 @@ class BaseRecipeViewSet(ModelViewSet):
             serializer = RecipeSerializer
         return serializer
 
-    @action(methods = ['POST'], detail = True, url_path = 'upload-image')
+    @action(methods = ['POST'], detail = True, url_path = 'upload-image', url_name='img_upload')
     def upload_recipe_image(self, request, pk=None):
         """
         Custom 'POST' endpoint with custom url, for uploading a recipe image.

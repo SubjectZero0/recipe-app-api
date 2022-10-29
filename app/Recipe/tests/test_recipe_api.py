@@ -1,10 +1,12 @@
-from enum import unique
-from typing import OrderedDict
 from rest_framework import status
-from django.urls import reverse
 from rest_framework.test import APITestCase
+
+from django.urls import reverse
 from django.contrib.auth import get_user_model
 from core.models import Ingredient, Recipe, Tag
+
+from PIL import Image
+import tempfile
 
 
 
@@ -579,3 +581,49 @@ class PrivateMyRecipeApiTests(APITestCase):
         response = self.client.get(INGREDIENT_LIST_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 4)
+
+######################################################################################################
+
+class TestImageUpload(APITestCase):
+    """
+    Tests uploading images for recipes
+    """
+    def setUp(self):
+        user_details = {
+            'email' : 'imageuser@example.com',
+            'name' : 'user image',
+            'password' : 'testpass'
+        }
+
+        self.user = create_user(**user_details)
+
+        self.client.force_authenticate(self.user)
+
+        recipe_info = {
+        'recipe_title':'Test Recipe for Image Upload',
+        'recipe_description':'Test description',
+        'recipe_instructions':"test instructions",
+        }
+
+        self.recipe = create_recipe(self.user, **recipe_info)
+
+    def test_image_upload(self):
+        """
+        Tests uploading a recipe image
+        """
+        IMG_UPLOAD_URL = reverse('recipes-img_upload', kwargs={'pk':self.recipe.id})
+
+        img = Image.new('RGB', (100,100))
+        temp_image_file = tempfile.NamedTemporaryFile(suffix='.jpg')
+        img.save(temp_image_file)
+        temp_image_file.seek(0)
+
+        payload = {
+            'image': temp_image_file
+        }
+
+        response = self.client.post(IMG_UPLOAD_URL, payload, format='multipart')
+        self.recipe.refresh_from_db()
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('image', response.data)
