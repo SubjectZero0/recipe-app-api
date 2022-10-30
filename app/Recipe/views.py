@@ -11,7 +11,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 
+from django.views.generic import TemplateView
+
 # Create your views here.
+
+class HomeTemplateView(TemplateView):
+    template_name = 'Recipe/index.html'
+
+##################################################################
 
 class BaseRecipeViewSet(ModelViewSet):
     """
@@ -24,6 +31,8 @@ class BaseRecipeViewSet(ModelViewSet):
     search_fields = [
         'recipe_title',
         'recipe_description',
+        'tags__tag_name',
+        'ingredients__ingredient_name'
         ]
 
     def perform_create(self, serializer):
