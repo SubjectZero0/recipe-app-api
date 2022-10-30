@@ -33,6 +33,7 @@ router.register('tags', TagsModelViewset, basename = 'tags')
 router.register('ingredients', IngredientsModelViewset, basename = 'ingredients')
 
 urlpatterns = [
+    path('', include('Recipe.urls')),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('', include('User.urls')),
