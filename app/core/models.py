@@ -50,13 +50,12 @@ class CustomUserModel(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+############################################################
 
 def image_path(instance, filename):
     """Function to explicitly create a path in MEDIA_ROOT for recipe images"""
     return 'images/{filename}'.format(filename=filename)
 
-
-############################################################
 
 class Recipe(models.Model):
     """
